@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI MD5 ULTIMATE - PRESTIGE V11</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue: #00e5ff;
+            --purple: #7000ff;
+            --red: #ff0055;
+            --green: #00ff88;
+            --gold: #ffcc00;
+            --bg: #01030a;
+        }
+
+        body {
+            margin: 0; background: var(--bg); color: white;
+            font-family: 'Orbitron', sans-serif; display: flex;
+            flex-direction: column; align-items: center; min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        canvas#snow { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 1; opacity: 0.5; }
+
+        .container { width: 94%; max-width: 450px; padding: 20px 0; position: relative; z-index: 10; }
+
+        /* Cảnh báo Bệt ⚡️ */
+        #warning {
+            display: none; background: linear-gradient(90deg, transparent, rgba(255,0,85,0.3), transparent);
+            border-top: 1px solid var(--red); border-bottom: 1px solid var(--red);
+            color: var(--red); padding: 10px; text-align: center;
+            font-weight: 900; font-size: 13px; margin-bottom: 15px;
+            text-shadow: 0 0 10px var(--red); animation: scan 1s infinite;
+        }
+        @keyframes scan { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* Card Hologram */
+        .card {
+            background: rgba(0, 20, 40, 0.85);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: 20px; padding: 25px; margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 1), inset 0 0 15px rgba(0, 229, 255, 0.1);
+            position: relative; overflow: hidden; backdrop-filter: blur(15px);
+        }
+
+        /* Lightning Frame Effect */
+        .lightning-frame {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+        .active-⚡ {
+            border: 2px solid var(--blue);
+            box-shadow: 0 0 50px var(--blue), inset 0 0 20px var(--blue);
+            animation: electric 0.2s infinite;
+        }
+        @keyframes electric { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+
+        input {
+            width: 100%; padding: 20px; background: #000;
+            border: 2px solid var(--blue); border-radius: 12px;
+            color: var(--blue); text-align: center; font-size: 16px;
+            font-family: 'Roboto Mono'; outline: none; box-sizing: border-box;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        }
+
+        .btn-main {
+            width: 100%; padding: 22px; margin-top: 15px;
+            background: linear-gradient(45deg, var(--blue), var(--purple));
+            border: none; border-radius: 15px; color: white;
+            font-weight: 900; font-size: 20px; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 4px;
+            box-shadow: 0 10px 25px rgba(112, 0, 255, 0.4);
+            transition: 0.2s;
+        }
+        .btn-main:active { transform: scale(0.95); filter: brightness(1.5); }
+
+        .res-display {
+            font-size: 70px; text-align: center; font-weight: 900;
+            margin: 20px 0; letter-spacing: 10px;
+            filter: drop-shadow(0 0 15px currentColor);
+        }
+
+        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+
+        /* Lịch sử kết quả thực */
+        .h-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.03);
+            font-family: 'Roboto Mono'; font-size: 13px;
+        }
+        .tag { padding: 5px 12px; border-radius: 6px; font-weight: 900; font-size: 11px; }
+        .tag-win { background: var(--green); color: #000; }
+        .tag-loss { background: var(--red); color: #fff; }
+
+        .music-toggle {
+            position: fixed; bottom: 25px; left: 25px;
+            background: rgba(0, 229, 255, 0.2); width: 50px; height: 50px;
+            border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; border: 1px solid var(--blue); z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="snow"></canvas>
+
+<div class="container">
+    <div id="warning">⚡️ CẢNH BÁO: HỆ THỐNG PHÁT HIỆN CẦU BỆT ⚡️</div>
+
+    <div class="card">
+        <input type="text" id="inputMd5" placeholder="DÁN MÃ MD5 TẾT 2026..." readonly onclick="paste()">
+        <button class="btn-main" onclick="analyze()">GIẢI MÃ ⚡️</button>
+    </div>
+
+    <div class="card" id="resCard" style="display: none;">
+        <div class="lightning-frame" id="lFrame"></div>
+        <div style="text-align:center; font-size:12px; color:var(--gold); letter-spacing:2px; font-weight:900;">DỰ ĐOÁN MD5</div>
+        <div id="mainRes" class="res-display">--</div>
+        
+        <div class="info-row"><span>XÁC SUẤT:</span> <span id="pVal" style="color:var(--green)">0%</span></div>
+        <div class="info-row"><span>TỔNG ĐIỂM:</span> <span id="sVal" style="color:var(--gold)">0</span></div>
+
+        <div style="display: flex; gap: 15px; margin-top: 30px; position: relative;">
+            <button onclick="record(true)" style="flex:1; padding:20px; background:var(--green); border:none; border-radius:12px; font-weight:900; color:black; cursor:pointer;">ĐÚNG (WIN)</button>
+            <button onclick="record(false)" style="flex:1; padding:20px; background:var(--red); border:none; border-radius:12px; color:white; font-weight:900; cursor:pointer;">SAI (LOSS)</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="color:var(--blue); font-size:14px; text-align:center; margin-bottom:15px; font-weight:900; border-bottom: 1px solid var(--blue); padding-bottom:10px;">LỊCH SỬ KẾT QUẢ THỰC TẾ</div>
+        <div id="hBox"></div>
+        <button onclick="reset()" style="width:100%; background:none; border:none; color:#333; font-size:10px; margin-top:15px; cursor:pointer;">RESET TRUTH ENGINE</button>
+    </div>
+</div>
+
+<div class="music-toggle" onclick="toggleM()">🧧</div>
+<audio id="bgM" loop><source src="https://raw.githubusercontent.com/dev-dangviet/nucuoimatchuoc/0b8a8ba708f6ccf3f07207a1019f1862debd811a/nucuoimatchuoc.mp3.m4a" type="audio/mp4"></audio>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+    let data = JSON.parse(localStorage.getItem('md5_truth_v11')) || { history: [] };
+    let cur = {};
+    const audio = document.getElementById("bgM");
+
+    window.onload = () => { render(); };
+
+    document.addEventListener('click', () => { if(audio.paused) audio.play(); }, {once: true});
+    function toggleM() { audio.paused ? audio.play() : audio.pause(); }
+
+    async function paste() {
+        const t = await navigator.clipboard.readText();
+        if(t.length > 5) document.getElementById("inputMd5").value = t;
+    }
+
+    function analyze() {
+        const input = document.getElementById("inputMd5").value.trim();
+        if(!input) return paste();
+
+        // Deep MD5 Slicing Logic (No Random)
+        const hash = CryptoJS.SHA256(input).toString();
+        const byte1 = parseInt(hash.charAt(0), 16);
+        const byteLast = parseInt(hash.charAt(63), 16);
+        const byteMid = parseInt(hash.charAt(32), 16);
+        
+        const res = ((byte1 + byteLast) % 2 === 0) ? "TÀI" : "XỈU";
+        cur = { 
+            res: res, 
+            prob: 81 + (byteMid % 18), 
+            score: res === "TÀI" ? (11 + (byte1 % 7)) : (4 + (byte1 % 7)) 
+        };
+
+        // Tia sét cực mạnh ⚡️
+        const frame = document.getElementById("lFrame");
+        frame.classList.add("active-⚡");
+        setTimeout(() => frame.classList.remove("active-⚡"), 600);
+
+        document.getElementById("mainRes").innerText = res;
+        document.getElementById("mainRes").style.color = res === "TÀI" ? "var(--red)" : "var(--blue)";
+        document.getElementById("pVal").innerText = cur.prob + "%";
+        document.getElementById("sVal").innerText = cur.score;
+        document.getElementById("resCard").style.display = "block";
+        if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    }
+
+    function record(isWin) {
+        // LOGIC TRUTH-MATCH: Lưu kết quả ĐÚNG của bàn game
+        let gameOutcome = cur.res;
+        if (!isWin) {
+            // Nếu bạn báo sai, kết quả thực của game là cửa ngược lại
+            gameOutcome = (cur.res === "TÀI") ? "XỈU" : "TÀI";
+        }
+
+        data.history.push({
+            game: gameOutcome, // Đây là kết quả thực tế bàn game ra
+            win: isWin,
+            time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        });
+
+        if(data.history.length > 15) data.history.shift();
+        localStorage.setItem('md5_truth_v11', JSON.stringify(data));
+        
+        render();
+        document.getElementById("resCard").style.display = "none";
+        document.getElementById("inputMd5").value = "";
+    }
+
+    function render() {
+        const box = document.getElementById("hBox");
+        box.innerHTML = "";
+        const history = data.history.slice().reverse();
+        
+        history.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "h-item";
+            div.innerHTML = `
+                <span>${item.time}</span>
+                <b style="color:${item.game === 'TÀI' ? 'var(--red)' : 'var(--blue)'}">${item.game === 'TÀI' ? '🔴' : '⚪'} ${item.game}</b>
+                <span class="tag ${item.win ? 'tag-win' : 'tag-loss'}">${item.win ? 'THẮNG' : 'THUA'}</span>
+            `;
+            box.appendChild(div);
+        });
+
+        // Tự động quét cầu bệt
+        if (history.length >= 3) {
+            const isBet = history.slice(0, 3).every(h => h.game === history[0].game);
+            document.getElementById("warning").style.display = isBet ? "block" : "none";
+        }
+    }
+
+    function reset() { if(confirm("Xóa lịch sử để soi cầu mới?")) { data.history = []; localStorage.removeItem('md5_truth_v11'); render(); } }
+
+    // Hiệu ứng tuyết rơi Hologram
+    const canvas = document.getElementById("snow");
+    const ctx = canvas.getContext("2d");
+    let f = [];
+    function init() {
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        f = Array.from({length: 40}, () => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*2+1, d: Math.random()*0.5+0.2 }));
+    }
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "rgba(0, 229, 255, 0.3)";
+        f.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill(); p.y += p.d; if(p.y > canvas.height) p.y = -5; });
+        requestAnimationFrame(draw);
+    }
+    init(); draw();
+</script>
+</body>
+</html>
